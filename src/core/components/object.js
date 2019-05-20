@@ -200,21 +200,23 @@ module.exports = function object (self) {
       }
 
       function next () {
-        self._ipld.put(node, {
-          version: 0,
-          hashAlg: 'sha2-256',
-          format: 'dag-pb'
-        }, (err, cid) => {
-          if (err) {
-            return callback(err)
-          }
+        self._gcLock.readLock((cb) => {
+          self._ipld.put(node, {
+            version: 0,
+            hashAlg: 'sha2-256',
+            format: 'dag-pb'
+          }, (err, cid) => {
+            if (err) {
+              return cb(err)
+            }
 
-          if (options.preload !== false) {
-            self._preload(cid)
-          }
+            if (options.preload !== false) {
+              self._preload(cid)
+            }
 
-          callback(null, cid)
-        })
+            cb(null, cid)
+          })
+        }, callback)
       }
     }),
 

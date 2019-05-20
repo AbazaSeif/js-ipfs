@@ -146,13 +146,13 @@ module.exports = function (self) {
     }
 
     opts.progress = progress
-    return pull(
+    return self._gcLock.pullReadLock(() => pull(
       pull.map(content => normalizeContent(content, opts)),
       pull.flatten(),
       importer(self._ipld, opts),
       pull.asyncMap((file, cb) => prepareFile(file, self, opts, cb)),
       pull.map(file => preloadFile(file, self, opts)),
       pull.asyncMap((file, cb) => pinFile(file, self, opts, cb))
-    )
+    ))
   }
 }
